@@ -1,0 +1,45 @@
+La classe ETL est destinée à fournir des service basiques d'ETL à partir d'une source de données sour forme de liste
+et de renvoyer un fichier texte contenant les données converties. 
+Il n'est pas prévu pour l'instant d'ajouter les données dans une base de données. Elle ne fournit que des services de production 
+de fichiers texte.
+
+Le cas typique d'usage est : 
+    - Source de données est une liste de données fournies en entrée
+    - Une fois la conversion effectuée les données sont stockées dans le dossier fourni en paramètre au format spécifié
+    - Les formats actuellement supportés sont les suivants: 
+        -CSV avec le choix du séparateur
+        -JSON
+        -XML
+    - d'autres formats pourront être développés ulétieurement
+    - le schéma de principe est le suivant :
+        - boucle de lecture de chaque ligne de la source de données
+        - exécution de l'ETL pour la ligne en cours de traitement
+        - mise en forme et ajour dans la variable data_cible
+        - sauvegarde de la variable data_cible après une éventuelle mise en forme liée au type de données produite
+
+    - Un mode spécial est prévu : exécution d'une méthode manuelle fournie en paramètre.
+        - cette technique permet de couvrir les cas d'usage non traités par les cas standards
+        - Le cas typique d'usage est le suivant : 
+            - la classe est supposée être dérivée. (la classe de base ne soit pas être modifiée)
+            - un nom de méthode est fourni en paramètre (et doit, bien sur, exister dans la classe dérivée.)
+            - par convention un prétraitement et/ou un post traitement à la boucle prioncipale d'exploitation peuvent être développés
+              pour gérer les cas particuliers.
+                - dans ce cas les méthodes sonc censée être respectivement ma_methode_pre et ma_methode_post
+                    - ces méthodes n'accèptent aucun paramètre en entrée mais implémentent le self. 
+                    - il n'est pas interdis que ces méthode fassent elle même appel à d'autre méthode, mais leur cohérence et le test
+                      sont laissé à la responsabilité du développeur. 
+            - le contrôle de l'inexistence de la méthode principale est effecuté et lève une exception en cas d'absence. 
+            - le contrôle de l'existance des méthodes de pré et post traitement est effectué mais ne lève aucune erreur, le traitement 
+              est simplement ignoré (un log de niveau 5 est néanmoins produit)
+            - aucune conversion ou mise en forme spécifique n'est effectué, le paramètre ETL_TYPE est ignoré dans ce cas. 
+              toute la mise en forme est laissé à la responsabilité du développeur
+            - les données en forme sont censées exister dans la variable self.date_cible et sont utilisées pour la sauvegarde des données. 
+              il est donc acquis que la sauvegarde est prise en charge par les méthodes de bases de la classe d'origine et ne sont pas sous 
+              la  responsabilité du développeur.
+        - le schéma de principe est le suivant : 
+            - exécution du prétraitement sur la variable data_source (normalement)
+            - exécution du traitement ligne par ligne de la variable data_source
+            - exécution du posttraitement sur la variable data_cible
+            - sauvegarde de la variable data_cible dans le fichier dont le nom et le chemin est fourni en paramètre.
+        
+        

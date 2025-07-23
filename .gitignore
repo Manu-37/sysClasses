@@ -1,0 +1,17 @@
+# Fichiers Python à ignorer
+__pycache__/
+*.pyc
+
+# Fichiers de config/dossiers locaux
+*.pyo
+*.pyd
+*.log
+*.tmp
+
+# Dossiers de configuration d'IDE
+.vscode/
+.idea/
+
+# Fichiers OneDrive temporaires
+~$*
+*.lnk
