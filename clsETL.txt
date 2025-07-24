@@ -1,3 +1,62 @@
+Version 2 du 20/07/2025
+La classe ETL est destinée à fournir des service basiques d'ETL à partir de source de données diverses et de produire des fichiers 
+textes dans différents formats (CSV/JSON/XML) elle fournit des astuces pour traiter les cas non prévus dans le contexte, tout en 
+maintenant un process standard. Voir section sur les cas particuliers
+Il n'est toujours pas prévu de fournir un service standard d'ajour dans une base de données. Par contre il est prévu mais non encore développé
+de fournir un service en lecture d'une base (Il faurdra fournir la requête) et d'export du résultat de la requête dans un des formats supportés. 
+
+Cas typique d'usage :
+Il sont de 2 type :
+- conversion d'un fichier depuis un format vers un autre
+- Export de données dans un des format supporté (non encore développé)
+et dépose dans un dossier fournit par l'appelant. 
+
+  - Les formats supporté en standard en entrée : 
+      - résultat d'une requete sql (non encore développé)  
+      - CSV
+      - JSON
+      - XML
+  - Les formats supportés en sortie sont les suivants :
+      - CSV
+      - JSON
+      - XML
+
+Le schéma de proincipe est le suivant :
+  - une source de donnée est fournie dans un des formats supportés
+  - Les données sont chargées en mémoire
+  - Aucun process de transformation standard n'est fourni, sauf à fournir la méthode de trransformation dans une classe fille
+  - Les données sont écrites dans un fichier dont le nom est fourni dans le format cible.
+
+Un mode spécial est prévu : exécution d'une méthode manuelle fournie en paramètre.
+  - cette technique permet de couvrir les cas d'usage non traités par les cas standards
+  - Le cas typique d'usage est le suivant : 
+      - la classe est supposée être dérivée. (la classe de base ne soit pas être modifiée)
+      - un nom de méthode est fourni en paramètre (et doit, bien sur, exister dans la classe dérivée.)
+      - par convention un prétraitement et/ou un post traitement à la boucle principale de transformation peuvent être développés
+        pour gérer les cas particuliers.
+          - dans ce cas les méthodes sonc censée être respectivement ma_methode_pre et ma_methode_post (ou ma_méthode est la méhode principale de transformation)
+              - ces méthodes n'accèptent aucun paramètre en entrée mais implémentent le self. 
+              - il n'est pas interdis que ces méthode fassent elle même appel à d'autre méthode, mais leur cohérence et le test
+                sont laissé à la responsabilité du développeur. 
+      - le contrôle de l'inexistence de la méthode principale est effecuté et lève une exception en cas d'absence. 
+      - le contrôle de l'existance des méthodes de pré et post traitement est effectué mais ne lève aucune erreur, le traitement 
+        est simplement ignoré (un log de niveau 5 est néanmoins produit)
+      - aucune conversion ou mise en forme spécifique n'est effectué, le paramètre ETL_TYPE est ignoré dans ce cas. 
+        toute la mise en forme est laissé à la responsabilité du développeur, il n'est bien sur pas interdit de réutiliser les process 
+        standards existants de mise en forme.
+      - les données en forme sont censées exister dans la variable self.data_cible et sont utilisées pour la sauvegarde des données. 
+        il est donc acquis que la sauvegarde est prise en charge par les méthodes de bases de la classe d'origine et ne sont pas sous 
+        la  responsabilité du développeur. Donc le format cible est fourni. La valeur spéciale de format, "$MAN$" indique que la sauvegarde est effectuée
+        lors du post traitement sous la seule responsabilité du développeur, les méthodes d'enregistrement des fichiers ne sont pas appelée dans ce cas.
+
+  - le schéma de principe est le suivant : 
+      - exécution du prétraitement sur la variable data_source (normalement)
+      - exécution du traitement ligne par ligne de la variable data_source
+      - exécution du posttraitement sur la variable data_cible
+      - sauvegarde de la variable data_cible dans le fichier dont le nom et le chemin sont fournis en paramètre.
+        Sauf si le format $MAN$ est indiqué.
+
+Version 1 du 30/06/2025
 La classe ETL est destinée à fournir des service basiques d'ETL à partir d'une source de données sour forme de liste
 et de renvoyer un fichier texte contenant les données converties. 
 Il n'est pas prévu pour l'instant d'ajouter les données dans une base de données. Elle ne fournit que des services de production 
